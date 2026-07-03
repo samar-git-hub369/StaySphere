@@ -150,6 +150,33 @@ export default function HotelDetails() {
                 ))}
               </div>
             </section>
+
+            {/* Reviews Section */}
+            <section className="mt-10 pt-10 border-t border-[var(--color-border-div)]">
+              <div className="flex items-center gap-2 mb-6">
+                <Star className="w-6 h-6 text-[var(--color-accent-gold)] fill-[var(--color-accent-gold)]" />
+                <h2 className="text-2xl font-bold text-[var(--color-primary)]">{MOCK_HOTEL.rating} • {MOCK_HOTEL.reviews} Reviews</h2>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {[1, 2, 3, 4].map(i => (
+                  <div key={i} className="border border-[var(--color-border-div)] p-4 rounded-xl">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-10 h-10 bg-gray-200 rounded-full overflow-hidden">
+                        <img src={`https://i.pravatar.cc/150?img=${i + 10}`} alt="User" />
+                      </div>
+                      <div>
+                        <div className="font-semibold text-sm">Guest User {i}</div>
+                        <div className="text-xs text-[var(--color-text-sec)]">October 2023</div>
+                      </div>
+                    </div>
+                    <p className="text-sm text-[var(--color-text-main)]">
+                      "Absolutely wonderful experience. The views were breathtaking and the staff was incredibly accommodating. Would highly recommend!"
+                    </p>
+                  </div>
+                ))}
+              </div>
+              <Button variant="outline" className="mt-6">Show all {MOCK_HOTEL.reviews} reviews</Button>
+            </section>
           </div>
 
           {/* Booking Widget */}
