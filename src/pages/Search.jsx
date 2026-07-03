@@ -22,11 +22,19 @@ export default function Search() {
   const [location, setLocation] = useState(initialLocation);
   const [guests, setGuests] = useState(initialGuests);
   const [priceRange, setPriceRange] = useState(1000);
+  const [selectedRatings, setSelectedRatings] = useState([]);
   
-  const filteredHotels = MOCK_HOTELS.filter(h => 
-    h.price <= priceRange && 
-    (location ? h.city.toLowerCase().includes(location.toLowerCase()) || h.name.toLowerCase().includes(location.toLowerCase()) : true)
-  );
+  const filteredHotels = MOCK_HOTELS.filter(h => {
+    const matchesPrice = h.price <= priceRange;
+    const matchesLocation = location ? h.city.toLowerCase().includes(location.toLowerCase()) || h.name.toLowerCase().includes(location.toLowerCase()) : true;
+    
+    // If no ratings selected, don't filter by rating. 
+    // If selected, hotel rating must be >= the minimum selected rating
+    const minRating = selectedRatings.length > 0 ? Math.min(...selectedRatings) : 0;
+    const matchesRating = h.rating >= minRating;
+    
+    return matchesPrice && matchesLocation && matchesRating;
+  });
 
   const handleUpdateSearch = () => {
     setSearchParams({ location, guests });
@@ -91,7 +99,18 @@ export default function Search() {
                   <div className="space-y-2">
                     {[5, 4, 3].map(rating => (
                       <label key={rating} className="flex items-center gap-2 cursor-pointer">
-                        <input type="checkbox" className="rounded text-[var(--color-primary)] focus:ring-[var(--color-primary)]" />
+                        <input 
+                          type="checkbox" 
+                          checked={selectedRatings.includes(rating)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedRatings([...selectedRatings, rating]);
+                            } else {
+                              setSelectedRatings(selectedRatings.filter(r => r !== rating));
+                            }
+                          }}
+                          className="rounded text-[var(--color-primary)] focus:ring-[var(--color-primary)]" 
+                        />
                         <span className="flex items-center text-sm text-[var(--color-text-sec)]">
                           {rating} <Star className="h-3 w-3 ml-1 text-[var(--color-accent-gold)] fill-[var(--color-accent-gold)]" /> & Up
                         </span>
