@@ -50,7 +50,7 @@ export default function DashboardLayout({ children, role }) {
                     to={link.path}
                     className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                       isActive 
-                        ? 'bg-[var(--color-primary)] text-white' 
+                        ? 'bg-[var(--color-primary)] text-[var(--color-accent-gold)]' 
                         : 'text-[var(--color-text-main)] hover:bg-[var(--color-section)]'
                     }`}
                   >

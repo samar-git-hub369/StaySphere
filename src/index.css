@@ -14,6 +14,7 @@
   --color-text-muted: #9CA3AF;
   
   --font-sans: "Inter", "Roboto", "Helvetica Neue", sans-serif;
+  --font-heading: "Playfair Display", serif;
 }
 
 body {
@@ -22,6 +23,10 @@ body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
 }
 
 @layer utilities {
