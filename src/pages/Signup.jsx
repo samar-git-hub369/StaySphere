@@ -4,28 +4,55 @@ import { useAuthStore } from '../store/useAuthStore';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Building2 } from 'lucide-react';
+import { auth, db } from '../firebase/config';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { doc, setDoc } from 'firebase/firestore';
 
 export default function Signup() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState('client');
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
   const { setUser } = useAuthStore();
   const navigate = useNavigate();
 
-  const handleSignup = (e) => {
+  const handleSignup = async (e) => {
     e.preventDefault();
-    // Mock signup logic
-    
-    setUser({
-      uid: 'mock-uid-' + Date.now(),
-      email,
-      name,
-      role,
-    });
+    setError(null);
+    setLoading(true);
 
-    if (role === 'lister') navigate('/lister/dashboard');
-    else navigate('/client/dashboard');
+    try {
+      // 1. Create user in Firebase Auth
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      // 2. Create user document in Firestore
+      const userData = {
+        name,
+        email,
+        role,
+        createdAt: new Date().toISOString()
+      };
+      
+      await setDoc(doc(db, 'users', user.uid), userData);
+
+      // 3. Update local state
+      setUser({
+        uid: user.uid,
+        ...userData
+      });
+
+      // 4. Redirect
+      if (role === 'lister') navigate('/lister/dashboard');
+      else navigate('/client/dashboard');
+    } catch (err) {
+      console.error(err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -42,6 +69,11 @@ export default function Signup() {
         </div>
         
         <form className="mt-8 space-y-6" onSubmit={handleSignup}>
+          {error && (
+            <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm">
+              {error}
+            </div>
+          )}
           <div className="space-y-4">
             <div>
               <label className="text-[var(--color-text-main)] text-sm font-medium mb-1 block">Full Name</label>

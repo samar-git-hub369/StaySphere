@@ -1,8 +1,9 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useAuthStore } from './store/useAuthStore';
 import { useEffect } from 'react';
-// import { auth } from './firebase/config';
-// import { onAuthStateChanged } from 'firebase/auth';
+import { auth, db } from './firebase/config';
+import { onAuthStateChanged } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
 
 import Login from './pages/Login';
 import Signup from './pages/Signup';
@@ -31,11 +32,36 @@ function App() {
   const { setUser, setLoading } = useAuthStore();
 
   useEffect(() => {
-    // Mock loading finish
-    setTimeout(() => {
-      setLoading(false);
-    }, 500);
-  }, [setUser, setLoading]);
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        try {
+          const userDocRef = doc(db, 'users', firebaseUser.uid);
+          const userDocSnap = await getDoc(userDocRef);
+          
+          if (userDocSnap.exists()) {
+            const userData = userDocSnap.data();
+            setUser({
+              uid: firebaseUser.uid,
+              email: firebaseUser.email,
+              ...userData
+            });
+          } else {
+            // Document might not exist right away during signup, 
+            // signup function handles setting the initial user state.
+            // But if it's a login without doc, we shouldn't fail silently.
+            setUser(null);
+          }
+        } catch (error) {
+          console.error("Error fetching user data:", error);
+          setUser(null);
+        }
+      } else {
+        setUser(null);
+      }
+    });
+
+    return () => unsubscribe();
+  }, [setUser]);
 
   return (
     <Router>
