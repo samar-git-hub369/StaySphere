@@ -3,9 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Building2, Plus, Trash2 } from 'lucide-react';
+import { db } from '../../firebase/config';
+import { collection, addDoc } from 'firebase/firestore';
+import { useAuthStore } from '../../store/useAuthStore';
 
 export default function AddHotel() {
   const navigate = useNavigate();
+  const { user } = useAuthStore();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
@@ -31,15 +35,32 @@ export default function AddHotel() {
     setFormData({ ...formData, amenities: newAmenities });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    // Mock save
-    setTimeout(() => {
+    
+    try {
+      const hotelData = {
+        ...formData,
+        pricePerNight: Number(formData.pricePerNight),
+        amenities: formData.amenities.filter(a => a.trim() !== ''),
+        listerId: user?.uid,
+        status: 'pending',
+        rating: 0,
+        reviewCount: 0,
+        createdAt: new Date().toISOString()
+      };
+
+      await addDoc(collection(db, 'hotels'), hotelData);
+      
       alert('Hotel submitted for approval!');
-      setLoading(false);
       navigate('/lister/dashboard');
-    }, 1000);
+    } catch (error) {
+      console.error("Error adding hotel: ", error);
+      alert('Failed to submit hotel.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
